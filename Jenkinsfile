@@ -70,11 +70,11 @@ pipeline {
                     script {
                         if (isUnix()) {
                             // Clean install all npm package dependencies
-                            sh 'npm ci'
+                            sh 'npm install'
                             // Compile Angular into optimized static files
                             sh 'npm run build -- --configuration production'
                         } else {
-                            bat 'npm ci'
+                            bat 'npm install'
                             bat 'npm run build -- --configuration production'
                         }
                     }
