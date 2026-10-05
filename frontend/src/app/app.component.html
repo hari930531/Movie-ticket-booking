@@ -1,0 +1,276 @@
+<div class="cinema-shell">
+  <!-- Top Branding Bar & Live Clock -->
+  <header class="theater-header">
+    <div class="brand-zone">
+      <span class="brand-icon">📽️</span>
+      <div>
+        <h1 class="theater-title">{{ theaterName }}</h1>
+        <p class="theater-subtitle">📍 {{ theaterLocation }}</p>
+      </div>
+    </div>
+
+    <!-- Live Digital Clock & Date Widget -->
+    <div class="live-clock-widget">
+      <div class="clock-date">
+        <span class="calendar-icon">📅</span> {{ currentDateStr }}
+      </div>
+      <div class="clock-time">
+        <span class="pulse-indicator"></span> {{ currentTimeStr }}
+      </div>
+      <span class="theater-tag">3 MULTIPLEX SCREENS • DOLBY ATMOS</span>
+    </div>
+  </header>
+
+  <!-- Cinema Marquee Announcement Strip -->
+  <div class="cinema-ticker-bar">
+    <div class="ticker-tag">⚡ 9 MOVIES PLAYING</div>
+    <div class="ticker-text">
+      <span>Screen 1: Jailer 2, Leo, Vishwanath & Sons • Screen 2: The Dark Knight, Spider-Man, Bramayugam • Screen 3: Kudumbasthan, Kalamkaval, Ekō</span>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <!-- Step 1: Screen Filter & 9 Movie Showcase -->
+    <section class="section-card">
+      <div class="section-title-row">
+        <div>
+          <h3>1. Select Movie</h3>
+          <span class="subtext">Choose a film across our 3 multiplex screens</span>
+        </div>
+        <div class="screen-filter-pills">
+          @for (scr of screens; track scr) {
+            <button 
+              type="button"
+              class="screen-tab" 
+              [class.active-screen]="selectedScreen === scr"
+              (click)="filterByScreen(scr)">
+              {{ scr }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- 9 Movie Poster Tiles Grid -->
+      <div class="movie-deck">
+        @for (movie of filteredMovies; track movie.id) {
+          <div 
+            class="poster-tile"
+            [class.active-poster]="selectedMovie?.id === movie.id"
+            (click)="selectMovie(movie)">
+            
+            <div class="poster-frame">
+              <img 
+                [src]="getMoviePoster(movie.title)" 
+                (error)="onPosterError($event, movie.title)"
+                [alt]="movie.title" 
+                class="poster-media" />
+              <div class="poster-overlay-gradient"></div>
+              
+              <span class="poster-screen-chip">{{ getScreenName(movie.title) }}</span>
+              <span class="poster-genre-chip">{{ movie.genre }}</span>
+              
+              @if (selectedMovie?.id === movie.id) {
+                <div class="selected-badge">✓ SELECTED</div>
+              }
+
+              <div class="poster-details">
+                <h4 class="poster-title">{{ movie.title }}</h4>
+                <div class="poster-stats">
+                  <span>⏱ {{ movie.duration }}m</span>
+                  <span class="poster-price">₹{{ movie.price }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3 Show Times Mini Strip -->
+            <div class="showtimes-mini-strip">
+              @for (st of getMovieShowtimes(movie.title); track st.session) {
+                <span class="time-tag">
+                  <strong>{{ st.session[0] }}:</strong> {{ st.time }}
+                </span>
+              }
+            </div>
+
+            <button type="button" class="poster-action-btn">
+              {{ selectedMovie?.id === movie.id ? 'Selected' : 'Book Show' }}
+            </button>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Step 2 & 3: Seating & Passenger Booking Section -->
+    @if (selectedMovie) {
+      <section class="section-card booking-grid-section">
+        <div class="booking-split">
+          
+          <!-- Seating Layout for the Screen -->
+          <div class="seating-panel">
+            <div class="section-title-row">
+              <h3>2. Choose Your Seat</h3>
+              <span class="badge">{{ getScreenName(selectedMovie.title) }}</span>
+            </div>
+
+            <div class="cinema-screen">
+              <div class="screen-bar"></div>
+              <span>EYES TOWARDS SCREEN</span>
+            </div>
+
+            <div class="seat-matrix">
+              @for (seat of seats; track seat.id) {
+                <button 
+                  type="button"
+                  class="seat-box" 
+                  [class.seat-available]="seat.status === 'available'"
+                  [class.seat-occupied]="seat.status === 'occupied'"
+                  [class.seat-selected]="seat.status === 'selected'"
+                  [disabled]="seat.status === 'occupied'"
+                  (click)="chooseSeat(seat)">
+                  {{ seat.id }}
+                </button>
+              }
+            </div>
+
+            <div class="legend-row">
+              <div class="legend-item"><span class="legend-dot green"></span> Available</div>
+              <div class="legend-item"><span class="legend-dot red"></span> Occupied</div>
+              <div class="legend-item"><span class="legend-dot gold"></span> Selected</div>
+            </div>
+          </div>
+
+          <!-- Passenger Details & 3-Showtime Selector -->
+          <div class="booking-panel">
+            <div class="section-title-row">
+              <h3>3. Show & Passenger Details</h3>
+            </div>
+
+            <div class="order-summary-box">
+              <p><strong>Film:</strong> {{ selectedMovie.title }}</p>
+              <p><strong>Auditorium:</strong> <span class="audi-highlight">{{ getScreenName(selectedMovie.title) }}</span></p>
+              <p><strong>Seat:</strong> {{ selectedSeat ? selectedSeat.id : 'Pick from layout' }}</p>
+              <p><strong>Price:</strong> <span class="film-price">₹{{ selectedMovie.price }}</span></p>
+            </div>
+
+            @if (errorMessage) {
+              <div class="error-banner">{{ errorMessage }}</div>
+            }
+
+            <form (ngSubmit)="bookTicket()" class="booking-fields">
+              <div class="field-item">
+                <label>Select Date *</label>
+                <select [(ngModel)]="selectedDate" name="selectedDate">
+                  @for (date of availableDates; track date) {
+                    <option [value]="date">{{ date }}</option>
+                  }
+                </select>
+              </div>
+
+              <!-- 3 Different Show Times (Morning, Afternoon, Night) -->
+              <div class="field-item">
+                <label>Choose Showtime (Morning / Afternoon / Night) *</label>
+                <div class="showtime-picker-grid">
+                  @for (st of getMovieShowtimes(selectedMovie.title); track st.session) {
+                    <button 
+                      type="button"
+                      class="showtime-btn" 
+                      [class.active-showtime]="selectedShowtime?.session === st.session"
+                      (click)="selectedShowtime = st">
+                      <span class="session-label">{{ st.badge }}</span>
+                      <strong class="session-time">{{ st.time }}</strong>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="field-item">
+                <label>Passenger Full Name *</label>
+                <input 
+                  type="text" 
+                  placeholder="Enter passenger name" 
+                  [(ngModel)]="customerName" 
+                  name="customerName" 
+                  required />
+              </div>
+
+              <div class="field-item">
+                <label>Contact Mobile Number *</label>
+                <input 
+                  type="tel" 
+                  placeholder="e.g. 9876543210" 
+                  [(ngModel)]="customerContact" 
+                  name="customerContact" 
+                  required />
+              </div>
+
+              <button type="submit" class="submit-action-btn" [disabled]="!selectedSeat || !selectedShowtime">
+                Confirm Booking (₹{{ selectedMovie.price }})
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Step 4: Generated Boarding-Pass Cinema Ticket -->
+    @if (confirmedTicket) {
+      <section class="section-card ticket-container-section">
+        <div class="ticket-header-actions">
+          <h3>🎟️ Ticket Generated Successfully!</h3>
+          <button type="button" class="print-btn" (click)="printTicket()">🖨️ Print Ticket</button>
+        </div>
+
+        <div class="boarding-pass">
+          <div class="pass-left">
+            <div class="pass-theater-head">
+              <h4>{{ confirmedTicket.theaterName }}</h4>
+              <p>{{ confirmedTicket.theaterAddress }}</p>
+            </div>
+
+            <div class="pass-movie-details">
+              <h2>{{ confirmedTicket.movieTitle }}</h2>
+              <span>{{ confirmedTicket.genre }} • {{ confirmedTicket.duration }} Minutes • {{ confirmedTicket.screenName }}</span>
+            </div>
+
+            <div class="pass-grid">
+              <div>
+                <small>PASSENGER</small>
+                <p>{{ confirmedTicket.customerName }}</p>
+              </div>
+              <div>
+                <small>CONTACT NUMBER</small>
+                <p>{{ confirmedTicket.customerContact }}</p>
+              </div>
+              <div>
+                <small>DATE & SESSION</small>
+                <p>{{ confirmedTicket.showDate }} • {{ confirmedTicket.showSession }} ({{ confirmedTicket.showTime }})</p>
+              </div>
+              <div>
+                <small>TICKET COLLECTION AMOUNT</small>
+                <p class="film-price">₹{{ confirmedTicket.totalPrice }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pass-divider">
+            <div class="notch top"></div>
+            <div class="dashed-line"></div>
+            <div class="notch bottom"></div>
+          </div>
+
+          <div class="pass-right">
+            <small>PASS NO.</small>
+            <h5>{{ confirmedTicket.ticketNumber }}</h5>
+            
+            <div class="stub-seat">
+              <small>SEAT</small>
+              <strong>{{ confirmedTicket.seatNumber }}</strong>
+            </div>
+
+            <div class="barcode">||| | ||||| || ||| ||||</div>
+            <span class="audi-tag">{{ confirmedTicket.screenName }}</span>
+          </div>
+        </div>
+      </section>
+    }
+  </main>
+</div>
