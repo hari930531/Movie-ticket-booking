@@ -149,8 +149,8 @@ pipeline {
                         // Start MySQL, backend, and frontend containers in detached mode
                         sh 'docker compose up -d --build'
                     } else {
-                        bat 'docker compose down'
-                        bat 'docker compose up -d --build'
+                        bat 'docker-compose down'
+                        bat 'docker-compose up -d --build'
                     }
                 }
             }
