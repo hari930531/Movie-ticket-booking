@@ -164,7 +164,7 @@ pipeline {
         // Runs only if all stages passed successfully
         success {
             echo "=========================================================="
-            echo "Pipeline Succeeded! Deployment is live on http://localhost[span_0](start_span)"[span_0](end_span)
+            echo "Pipeline Succeeded! Deployment is live on http://localhost"
             echo "=========================================================="
         }
         
