@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jenkins CI/CD Pipeline & Groovy Setup Manual - Hari's Theater</title>
+  <style>
+    /* CSS Reset & Core System Fonts */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #000000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 13.5px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 14mm 14mm 16mm 14mm;
+    }
+
+    body {
+      padding: 24px 30px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Floating Print Action Button */
+    .print-btn-bar {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      gap: 10px;
+    }
+
+    .print-btn {
+      background: #0f172a;
+      color: #ffffff;
+      border: 2px solid #000000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .print-btn:hover {
+      background: #f59e0b;
+      color: #000000;
+      border-color: #000000;
+      transform: translateY(-1px);
+    }
+
+    /* Headings and Badges */
+    .doc-badge {
+      display: inline-block;
+      border: 2px solid #b45309;
+      background: #fef3c7;
+      color: #78350f;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 900;
+      color: #000000;
+      margin: 4px 0 6px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid #000000;
+      letter-spacing: -0.3px;
+    }
+
+    .meta-box {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 20px;
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+
+    h2 {
+      font-size: 16.5px;
+      font-weight: 800;
+      color: #000000;
+      margin-top: 26px;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #334155;
+      page-break-after: avoid;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 18px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+
+    p {
+      color: #0f172a;
+      margin: 8px 0;
+      font-weight: 500;
+    }
+
+    ul, ol {
+      margin: 8px 0 14px 20px;
+      padding: 0;
+      color: #0f172a;
+      font-weight: 500;
+    }
+
+    li {
+      margin-bottom: 5px;
+    }
+
+    /* High-Contrast Code Blocks */
+    pre {
+      background-color: #f8fafc !important;
+      border: 2px solid #0f172a !important;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin: 10px 0 16px;
+      font-family: "Consolas", "Courier New", "Liberation Mono", Courier, monospace;
+      font-size: 12px;
+      font-weight: 700 !important;
+      color: #000000 !important;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-all;
+      page-break-inside: avoid;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", "Liberation Mono", Courier, monospace;
+      background: #f1f5f9;
+      border: 1px solid #94a3b8;
+      color: #000000;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    pre code {
+      border: none;
+      background: transparent;
+      padding: 0;
+      font-size: 12px;
+      color: #000000;
+    }
+
+    /* High-Contrast Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px;
+      font-size: 12.5px;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1.5px solid #000000;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+      color: #000000;
+    }
+
+    th {
+      background-color: #e2e8f0 !important;
+      font-weight: 800;
+    }
+
+    td {
+      font-weight: 600;
+    }
+
+    .badge-solid {
+      display: inline-block;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid #000000;
+      font-size: 11px;
+    }
+
+    .badge-step { background: #0f172a; color: #ffffff; }
+    .badge-warn { background: #fee2e2; color: #991b1b; }
+
+    /* Page Breaks for Clean Multi-Page Printing */
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+      margin-top: 10px;
+      display: block;
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .print-btn-bar {
+        display: none !important;
+      }
+
+      pre {
+        background-color: #f8fafc !important;
+        border: 2px solid #000000 !important;
+        color: #000000 !important;
+      }
+
+      th {
+        background-color: #e2e8f0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Print Control Button -->
+  <div class="print-btn-bar">
+    <button class="print-btn" onclick="window.print()">
+      🖨️ Save as Crisp PDF
+    </button>
+  </div>
+
+  <span class="doc-badge">DevOps Standard Operating Procedure (SOP)</span>
+  <h1>🛠️️ Jenkins CI/CD Pipeline & Groovy Setup Manual</h1>
+  <div class="meta-box">
+    📽️ <strong>Project:</strong> Hari's Theater Cinema Ticket Booking System &nbsp;|&nbsp; <strong>Target:</strong> Automated End-to-End Build, Push & Container Deployment
+  </div>
+
+  <p>This manual provides exhaustive, step-by-step instructions for installing and provisioning a production Jenkins Continuous Integration and Continuous Deployment (CI/CD) engine. It standardizes automated testing, multi-stage Docker builds, Docker Hub registry publication, and Docker Compose runtime rollout via declarative Groovy code.</p>
+
+  <h2>1. CI/CD Architecture Flow</h2>
+  <pre>
+Developer Commit (Git Push)
+       │
+       ▼ Webhook / Poll SCM
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Jenkins Master Engine                           │
+│   ├── Stage 1: Checkout SCM (GitHub / Git Repository)                  │
+│   ├── Stage 2: Backend Maven Build & Test (Java 17 / JAR artifact)     │
+│   ├── Stage 3: Frontend Angular Compilation (Node 18 / Production Dist)│
+│   ├── Stage 4: Docker Multi-Stage Image Builds                         │
+│   ├── Stage 5: Authenticated Push to Docker Hub Registry               │
+│   └── Stage 6: Rolling Deployment via Docker Compose                   │
+└────────────────────────────────────────────────────────────────────────┘
+       │                                          │
+       ▼ Push Image Registry                      ▼ Local / Remote Rollout
+┌───────────────────────────┐              ┌─────────────────────────────┐
+│     Docker Hub Registry   │              │     Production Host Host    │
+│  • cinema-backend:latest  │              │  • cinema-frontend (Port 80)│
+│  • cinema-frontend:latest │              │  • cinema-backend (8080)    │
+│                           │              │  • cinema-mysql (Port 3306) │
+└───────────────────────────┘              └─────────────────────────────┘
+  </pre>
+
+  <h2>2. Required Jenkins Plugins</h2>
+  <p>Log in to Jenkins as Administrator, navigate to <strong>Manage Jenkins &gt; Plugins &gt; Available Plugins</strong>, search for and install the following packages without restart:</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Plugin Name</th>
+        <th style="width: 25%;">Plugin ID</th>
+        <th style="width: 50%;">Core Responsibility</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Pipeline</strong></td>
+        <td><code>workflow-aggregator</code></td>
+        <td>Provides declarative Groovy DSL syntax orchestration.</td>
+      </tr>
+      <tr>
+        <td><strong>Git Plugin</strong></td>
+        <td><code>git</code></td>
+        <td>Automates repository polling, cloning, and branch management.</td>
+      </tr>
+      <tr>
+        <td><strong>NodeJS Plugin</strong></td>
+        <td><code>nodejs</code></td>
+        <td>Auto-provisions Node and npm runtimes on Jenkins build agents.</td>
+      </tr>
+      <tr>
+        <td><strong>Docker Pipeline</strong></td>
+        <td><code>docker-workflow</code></td>
+        <td>Enables native docker commands, authentication, and execution blocks.</td>
+      </tr>
+      <tr>
+        <td><strong>Credentials Binding</strong></td>
+        <td><code>credentials-binding</code></td>
+        <td>Allows secret credentials injection into build environments securely.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. Global Tool Configuration (Exact Matching)</h2>
+  <p>Navigate to <strong>Manage Jenkins &gt; Tools</strong>. The names configured here <strong>must match the names declared in the Groovy Jenkinsfile</strong> exactly:</p>
+
+  <h3>3.1 JDK Installation (Java 17)</h3>
+  <ul>
+    <li>Click <strong>Add JDK</strong>.</li>
+    <li><strong>Name:</strong> <code>JDK-17</code></li>
+    <li><strong>Configuration:</strong> Check <em>Install automatically</em> (Adoptium / Eclipse Temurin 17.x) OR provide local <code>JAVA_HOME</code> path (e.g. <code>C:\Program Files\Java\jdk-17</code> or <code>/usr/lib/jvm/java-17-openjdk</code>).</li>
+  </ul>
+
+  <h3>3.2 Maven Installation (Maven 3.9+)</h3>
+  <ul>
+    <li>Click <strong>Add Maven</strong>.</li>
+    <li><strong>Name:</strong> <code>Maven-3.9</code></li>
+    <li><strong>Configuration:</strong> Check <em>Install automatically</em> and select latest Apache Maven <code>3.9.x</code> version.</li>
+  </ul>
+
+  <h3>3.3 NodeJS Installation (NodeJS 18+)</h3>
+  <ul>
+    <li>Click <strong>Add NodeJS</strong>.</li>
+    <li><strong>Name:</strong> <code>NodeJS-18</code></li>
+    <li><strong>Configuration:</strong> Check <em>Install automatically</em> and select <code>NodeJS 18.x (LTS)</code>.</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <h2>4. Docker Hub Secret Credentials Configuration</h2>
+  <p>To safely authenticate and push container images to Docker Hub without hardcoding passwords in scripts:</p>
+  <ol>
+    <li>Navigate to: <strong>Manage Jenkins &gt; Credentials &gt; System &gt; Global credentials (unrestricted)</strong>.</li>
+    <li>Click <strong>Add Credentials</strong> in the top right.</li>
+    <li>Fill in the fields exactly as follows:
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 35%;">Configuration Field</th>
+            <th style="width: 65%;">Value to Enter</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Kind</strong></td>
+            <td><code>Username with password</code></td>
+          </tr>
+          <tr>
+            <td><strong>Scope</strong></td>
+            <td><code>Global (Jenkins, nodes, items, all child items)</code></td>
+          </tr>
+          <tr>
+            <td><strong>Username</strong></td>
+            <td>Your Docker Hub account username (e.g., <code>hariadmin</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>Password</strong></td>
+            <td>Your Docker Hub Personal Access Token (PAT) or Account Password</td>
+          </tr>
+          <tr>
+            <td><strong>ID</strong></td>
+            <td><code>docker-hub-credentials</code> (Must match Jenkinsfile variable)</td>
+          </tr>
+          <tr>
+            <td><strong>Description</strong></td>
+            <td><code>Docker Hub Registry Credentials for Cinema System</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+    <li>Click <strong>Create</strong>.</li>
+  </ol>
+
+  <h2>5. Step-by-Step Pipeline Job Creation</h2>
+  <ol>
+    <li>From the Jenkins Dashboard, select <strong>New Item</strong>.</li>
+    <li>Enter an item name: <code>haris-theater-pipeline</code>.</li>
+    <li>Select <strong>Pipeline</strong> as the project type and click <strong>OK</strong>.</li>
+    <li>In the configuration view:
+      <ul>
+        <li>Scroll down to the <strong>Pipeline</strong> section.</li>
+        <li><strong>Definition:</strong> Change dropdown from <em>Pipeline script</em> to <strong>Pipeline script from SCM</strong>.</li>
+        <li><strong>SCM:</strong> Select <strong>Git</strong>.</li>
+        <li><strong>Repository URL:</strong> Enter your Git project URL (e.g., <code>https://github.com/youruser/Movie-ticket-booking.git</code>).</li>
+        <li><strong>Credentials:</strong> Select your GitHub personal access token / SSH key if private.</li>
+        <li><strong>Branch Specifier:</strong> <code>*/main</code> (or <code>*/master</code>).</li>
+        <li><strong>Script Path:</strong> <code>Jenkinsfile</code> (Located in project root).</li>
+      </ul>
+    </li>
+    <li>Click <strong>Save</strong>.</li>
+    <li>Click <strong>Build Now</strong> on the left sidebar to execute your first pipeline run.</li>
+  </ol>
+
+  <div class="page-break"></div>
+
+  <h2>6. Full Production Declarative Jenkinsfile (Groovy)</h2>
+  <p>Place this exact code in <code>H:\PROJECT\Movie-ticket-booking\Jenkinsfile</code>:</p>
+  <pre>
+pipeline {
+    agent any
+
+    environment {
+        // Registry Credentials and Image Nomenclature
+        DOCKER_HUB_CRED_ID  = 'docker-hub-credentials'
+        DOCKER_USER         = 'yourdockerhubusername' // Update with your Docker Hub ID
+        BACKEND_IMAGE_NAME  = "${DOCKER_USER}/cinema-backend"
+        FRONTEND_IMAGE_NAME = "${DOCKER_USER}/cinema-frontend"
+        IMAGE_TAG           = "${BUILD_NUMBER}"
+    }
+
+    tools {
+        jdk 'JDK-17'
+        maven 'Maven-3.9'
+        nodejs 'NodeJS-18'
+    }
+
+    stages {
+        stage('1. Checkout Source Code') {
+            steps {
+                echo 'Checking out code from version control...'
+                checkout scm
+            }
+        }
+
+        stage('2. Backend Build & Test') {
+            steps {
+                echo 'Compiling Spring Boot backend and producing runnable JAR...'
+                dir('backend') {
+                    script {
+                        if (isUnix()) {
+                            sh 'mvn clean package -DskipTests'
+                        } else {
+                            bat 'mvn clean package -DskipTests'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('3. Frontend Build') {
+            steps {
+                echo 'Installing Angular dependencies and generating production bundles...'
+                dir('frontend') {
+                    script {
+                        if (isUnix()) {
+                            sh 'npm ci'
+                            sh 'npm run build -- --configuration production'
+                        } else {
+                            bat 'npm ci'
+                            bat 'npm run build -- --configuration production'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('4. Build Docker Images') {
+            steps {
+                echo 'Building multi-tier Docker containers...'
+                script {
+                    if (isUnix()) {
+                        sh "docker build -t ${BACKEND_IMAGE_NAME}:${IMAGE_TAG} -t ${BACKEND_IMAGE_NAME}:latest ./backend"
+                        sh "docker build -t ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG} -t ${FRONTEND_IMAGE_NAME}:latest ./frontend"
+                    } else {
+                        bat "docker build -t ${BACKEND_IMAGE_NAME}:${IMAGE_TAG} -t ${BACKEND_IMAGE_NAME}:latest ./backend"
+                        bat "docker build -t ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG} -t ${FRONTEND_IMAGE_NAME}:latest ./frontend"
+                    }
+                }
+            }
+        }
+
+        stage('5. Push to Docker Hub') {
+            steps {
+                echo 'Authenticating with Docker Hub and uploading versioned tags...'
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CRED_ID}", usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
+                    script {
+                        if (isUnix()) {
+                            sh "echo \$DH_PASS | docker login -u \$DH_USER --password-stdin"
+                            sh "docker push ${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
+                            sh "docker push ${BACKEND_IMAGE_NAME}:latest"
+                            sh "docker push ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
+                            sh "docker push ${FRONTEND_IMAGE_NAME}:latest"
+                            sh "docker logout"
+                        } else {
+                            bat "echo %DH_PASS% | docker login -u %DH_USER% --password-stdin"
+                            bat "docker push ${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
+                            bat "docker push ${BACKEND_IMAGE_NAME}:latest"
+                            bat "docker push ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
+                            bat "docker push ${FRONTEND_IMAGE_NAME}:latest"
+                            bat "docker logout"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('6. Deploy with Docker Compose') {
+            steps {
+                echo 'Rolling deployment: refreshing services on target node...'
+                script {
+                    if (isUnix()) {
+                        sh 'docker compose down'
+                        sh 'docker compose up -d --build'
+                    } else {
+                        bat 'docker compose down'
+                        bat 'docker compose up -d --build'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "=========================================================="
+            echo "Pipeline Passed! Hari's Theater is LIVE on http://localhost"
+            echo "=========================================================="
+        }
+        failure {
+            echo "=========================================================="
+            echo "Pipeline Failed! Inspect Stage View logs for diagnosis."
+            echo "=========================================================="
+        }
+        always {
+            echo 'Pruning dangling temporary images to optimize disk volume...'
+            script {
+                if (isUnix()) {
+                    sh 'docker image prune -f'
+                } else {
+                    bat 'docker image prune -f'
+                }
+            }
+        }
+    }
+}
+  </pre>
+
+  <div class="page-break"></div>
+
+  <h2>7. CI/CD Troubleshooting & Diagnostic Runbook</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 30%;">Encountered Error</th>
+        <th style="width: 35%;">Probable Root Cause</th>
+        <th style="width: 35%;">Remediation Step</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>Tool [JDK-17] was not found</code></td>
+        <td>Mismatched naming in Global Tool Configuration.</td>
+        <td>Navigate to <strong>Manage Jenkins &gt; Tools</strong> and verify exact spelling of <code>JDK-17</code>.</td>
+      </tr>
+      <tr>
+        <td><code>docker: permission denied</code></td>
+        <td>The <code>jenkins</code> system user is not a member of the host <code>docker</code> security group.</td>
+        <td>Run on host: <code>sudo usermod -aG docker jenkins</code> and restart Jenkins service (<code>sudo systemctl restart jenkins</code>).</td>
+      </tr>
+      <tr>
+        <td><code>denied: requested access to the resource is denied</code></td>
+        <td>Invalid Docker Hub credentials or mismatched image repository prefix.</td>
+        <td>Ensure <code>DOCKER_USER</code> matches the account that owns the Docker Hub namespace, and re-check <code>docker-hub-credentials</code>.</td>
+      </tr>
+      <tr>
+        <td><code>npm: command not found</code></td>
+        <td>NodeJS tool not configured or missing from PATH on agent.</td>
+        <td>Configure <code>NodeJS-18</code> in Global Tool Configuration and verify the plugin is active.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>8. Production Verification Checklist</h2>
+  <ol>
+    <li><strong>Pipeline Stage View:</strong> Verify all 6 stages display Green checkmarks in the Jenkins Web UI.</li>
+    <li><strong>Docker Hub Registry:</strong> Visit <code>hub.docker.com</code> and confirm repositories <code>cinema-backend</code> and <code>cinema-frontend</code> received updated build tags.</li>
+    <li><strong>Runtime Ingress:</strong> Access <code>http://localhost</code> to confirm the production Angular application displays all 9 movie posters without 404 errors.</li>
+    <li><strong>Backend Health:</strong> Access <code>http://localhost:8080/api/movies</code> to verify JSON catalog streaming directly from the MySQL database container.</li>
+  </ol>
+
+</body>
+</html>

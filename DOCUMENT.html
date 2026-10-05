@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hari's Theater - Project & Docker Documentation</title>
+  <style>
+    /* CSS Reset & System Fonts */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #000000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 13.5px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Print Color Correction to guarantee solid borders and colors */
+    @page {
+      size: A4 portrait;
+      margin: 14mm 14mm 16mm 14mm;
+    }
+
+    body {
+      padding: 24px 30px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Floating Print Action Button */
+    .print-btn-bar {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      gap: 10px;
+    }
+
+    .print-btn {
+      background: #0f172a;
+      color: #ffffff;
+      border: 2px solid #000000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .print-btn:hover {
+      background: #f59e0b;
+      color: #000000;
+      border-color: #000000;
+      transform: translateY(-1px);
+    }
+
+    /* Typography & Headers */
+    .doc-badge {
+      display: inline-block;
+      border: 2px solid #b45309;
+      background: #fef3c7;
+      color: #78350f;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 900;
+      color: #000000;
+      margin: 4px 0 6px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid #000000;
+      letter-spacing: -0.3px;
+    }
+
+    .theater-meta {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 20px;
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+
+    h2 {
+      font-size: 16.5px;
+      font-weight: 800;
+      color: #000000;
+      margin-top: 28px;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #334155;
+      page-break-after: avoid;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 18px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+
+    p {
+      color: #0f172a;
+      margin: 8px 0;
+      font-weight: 500;
+    }
+
+    ul, ol {
+      margin: 8px 0 14px 20px;
+      padding: 0;
+      color: #0f172a;
+      font-weight: 500;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    /* High-Contrast Crisp Code & Blockquote Styles */
+    pre {
+      background-color: #f8fafc !important;
+      border: 2px solid #0f172a !important;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin: 10px 0 16px;
+      font-family: "Consolas", "Courier New", "Liberation Mono", Courier, monospace;
+      font-size: 12px;
+      font-weight: 700 !important;
+      color: #000000 !important;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-all;
+      page-break-inside: avoid;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", "Liberation Mono", Courier, monospace;
+      background: #f1f5f9;
+      border: 1px solid #94a3b8;
+      color: #000000;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    pre code {
+      border: none;
+      background: transparent;
+      padding: 0;
+      font-size: 12px;
+      color: #000000;
+    }
+
+    /* High-Contrast Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px;
+      font-size: 12.5px;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1.5px solid #000000;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+      color: #000000;
+    }
+
+    th {
+      background-color: #e2e8f0 !important;
+      font-weight: 800;
+    }
+
+    td {
+      font-weight: 600;
+    }
+
+    .badge-solid {
+      display: inline-block;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid #000000;
+      font-size: 11px;
+    }
+
+    .badge-green { background: #dcfce7; color: #14532d; }
+    .badge-gold  { background: #fef3c7; color: #78350f; }
+    .badge-red   { background: #fee2e2; color: #7f1d1d; }
+
+    /* Page Breaks for Multi-Page Printing */
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+      margin-top: 10px;
+      display: block;
+    }
+
+    /* Print Output Enforcements */
+    @media print {
+      body {
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .print-btn-bar {
+        display: none !important;
+      }
+
+      pre {
+        background-color: #f8fafc !important;
+        border: 2px solid #000000 !important;
+        color: #000000 !important;
+      }
+
+      th {
+        background-color: #e2e8f0 !important;
+      }
+
+      a {
+        text-decoration: none;
+        color: #000000;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Print Control Button (Hidden automatically on PDF print) -->
+  <div class="print-btn-bar">
+    <button class="print-btn" onclick="window.print()">
+      🖨️ Save as Crisp PDF
+    </button>
+  </div>
+
+  <span class="doc-badge">Official Deployment & Technical Manual</span>
+  <h1>📽️ Hari's Theater - Movie Ticket Booking System</h1>
+  <div class="theater-meta">
+    📍 <strong>Auditorium Address:</strong> Sanarapatti, Perumbalai, Pennagaram, Dharmapuri - 636811 &nbsp;|&nbsp; <strong>Infrastructure:</strong> 3 Multiplex Auditoriums • 9 Movie Simultaneous Engine
+  </div>
+
+  <p>This technical specification covers the architecture, MySQL database design, tri-screen scheduling rules, and the multi-container Docker cluster deployment for Hari's Theater.</p>
+
+  <h2>1. System Architecture Diagram</h2>
+  <pre>
+Patron Browser (Desktop / Mobile Client)
+       │
+       ▼  Port 80 (HTTP / Standard Web Ingress)
+┌────────────────────────────────────────────────────────────────────────┐
+│                   cinema-frontend Container (Nginx)                    │
+│   ├── Serves Angular SPA Bundles & Movie Posters (/movies/*.jpeg)      │
+│   └── Reverse Proxies API traffic (/api/...) ──────────────────────┐   │
+└────────────────────────────────────────────────────────────────────┼───┘
+                                                                     │
+                                                                     ▼ Port 8080 (REST API)
+                                                      ┌───────────────────────────────┐
+                                                      │    cinema-backend Container   │
+                                                      │   (Spring Boot 3.x / Java 17) │
+                                                      │   ├── Booking Service Engine  │
+                                                      │   └── Movie Catalog APIs      │
+                                                      └──────────────┬────────────────┘
+                                                                     │
+                                                                     ▼ Port 3306 (JDBC SQL)
+                                                      ┌───────────────────────────────┐
+                                                      │     cinema-mysql Container    │
+                                                      │   (MySQL 8.0 Community Server)│
+                                                      │   └── Database: ticket_booking│
+                                                      └───────────────────────────────┘
+  </pre>
+
+  <h2>2. Screen Layout & Tri-Session Schedule Matrix</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Auditorium</th>
+        <th style="width: 45%;">Featured Movies Catalog</th>
+        <th style="width: 30%;">Showtime Slots</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Screen 1</strong><br>Dolby Atmos 4K</td>
+        <td>1. Jailer 2 (₹250)<br>2. Leo (₹250)<br>3. Vishwanath & Sons (₹220)</td>
+        <td>• 🌅 Morning: 10:00–11:00 AM<br>• ☀️ Matinee: 01:30–02:45 PM<br>• 🌙 Night: 06:00–07:15 PM</td>
+      </tr>
+      <tr>
+        <td><strong>Screen 2</strong><br>RGB Laser Cinema</td>
+        <td>4. The Dark Knight (₹220)<br>5. Spider-Man Remastered (₹240)<br>6. Bramayugam (₹200)</td>
+        <td>• 🌅 Morning: 10:15–11:15 AM<br>• ☀️ Matinee: 02:00–03:00 PM<br>• 🌙 Night: 06:30–07:30 PM</td>
+      </tr>
+      <tr>
+        <td><strong>Screen 3</strong><br>VIP Luxe Cinema</td>
+        <td>7. Kudumbasthan (₹180)<br>8. Kalamkaval (₹200)<br>9. Ekō (₹180)</td>
+        <td>• 🌅 Morning: 10:00–11:00 AM<br>• ☀️ Matinee: 01:45–02:30 PM<br>• 🌙 Night: 06:15–07:00 PM</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Force Page Break for Clean Section Separation -->
+  <div class="page-break"></div>
+
+  <h2>3. Complete Database Schema (`ticket_booking`)</h2>
+  <pre>
+-- 1. Database Creation
+CREATE DATABASE IF NOT EXISTS ticket_booking;
+USE ticket_booking;
+
+-- 2. Movies Catalog Table
+CREATE TABLE IF NOT EXISTS movies (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    genre VARCHAR(100),
+    duration INT,
+    price DOUBLE
+);
+
+-- 3. Confirmed Passenger Bookings Table
+CREATE TABLE IF NOT EXISTS bookings (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    movie_id BIGINT,
+    customer_name VARCHAR(255),
+    seat_number VARCHAR(10),
+    theater VARCHAR(255),
+    show_date VARCHAR(50),
+    show_time VARCHAR(50),
+    total_amount DOUBLE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (movie_id) REFERENCES movies(id)
+);
+
+-- 4. Initial Seed Data (All 9 Films with Correct Nomenclature)
+INSERT INTO movies (id, title, genre, duration, price) VALUES
+(1, 'Jailer 2', 'Action / Crime', 165, 250.0),
+(2, 'Leo', 'Action / Thriller', 164, 250.0),
+(3, 'Vishwanath & Sons', 'Family Drama', 148, 220.0),
+(4, 'The Dark Knight', 'Action / Crime', 152, 220.0),
+(5, 'Spider-Man Remastered', 'Action / Sci-Fi', 135, 240.0),
+(6, 'Bramayugam', 'Mystery / Horror', 139, 200.0),
+(7, 'Kudumbasthan', 'Comedy / Drama', 140, 180.0),
+(8, 'Kalamkaval', 'Crime / Investigation', 145, 200.0),
+(9, 'Ekō', 'Adventure / Drama', 125, 180.0);
+  </pre>
+
+  <h2>4. Seating Matrix Legend</h2>
+  <p>The cinema hall renders a 24-seat layout (Rows A–D, Columns 1–6) with deterministic state feedback:</p>
+  <ul>
+    <li><span class="badge-solid badge-green">🟢 AVAILABLE</span>: Seat is open for reservation. Clicking toggles selection.</li>
+    <li><span class="badge-solid badge-gold">🟡 SELECTED</span>: Currently picked seat by customer awaiting confirmation.</li>
+    <li><span class="badge-solid badge-red">🔴 OCCUPIED</span>: Locked / reserved seat; disabled from click interaction.</li>
+  </ul>
+
+  <!-- Force Page Break -->
+  <div class="page-break"></div>
+
+  <h2>5. Docker Multi-Stage Container Setup</h2>
+
+  <h3>5.1 Backend Multi-Stage Dockerfile (<code>backend/Dockerfile</code>)</h3>
+  <pre>
+# Stage 1: Build the Executable JAR with Maven
+FROM maven:3.9-eclipse-temurin-17 AS builder
+WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Stage 2: Minimalist Lightweight Production Runtime
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
+  </pre>
+
+  <h3>5.2 Nginx Reverse Proxy Configuration (<code>frontend/nginx.conf</code>)</h3>
+  <pre>
+server {
+    listen 80;
+    server_name localhost;
+
+    # Serve static Angular SPA bundles & movie posters
+    location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        try_files $uri$uri/ /index.html;
+    }
+
+    # Direct proxying of REST API requests to Spring Boot container
+    location /api/ {
+        proxy_pass http://backend:8080/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+  </pre>
+
+  <h3>5.3 Frontend Multi-Stage Dockerfile (<code>frontend/Dockerfile</code>)</h3>
+  <pre>
+# Stage 1: Build Angular Static Artifacts
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build -- --configuration production
+
+# Stage 2: Serve using Nginx Alpine
+FROM nginx:alpine
+COPY --from=builder /app/dist/frontend/browser /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+  </pre>
+
+  <!-- Force Page Break -->
+  <div class="page-break"></div>
+
+  <h3>5.4 Docker Compose Orchestrator (<code>docker-compose.yml</code>)</h3>
+  <pre>
+version: '3.8'
+
+services:
+  # 1. Database Tier
+  mysql-db:
+    image: mysql:8.0
+    container_name: cinema-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ticket_booking
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - cinema-net
+
+  # 2. Application Server Tier
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cinema-backend
+    restart: on-failure
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/ticket_booking?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rootpassword
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql-db
+    networks:
+      - cinema-net
+
+  # 3. Web & Proxy Tier
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cinema-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - cinema-net
+
+volumes:
+  db_data:
+
+networks:
+  cinema-net:
+    driver: bridge
+  </pre>
+
+  <h2>6. Step-by-Step Operations & Terminal Runbook</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 40%;">Deployment Stage</th>
+        <th style="width: 60%;">Executable PowerShell / Bash Command</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Build & Start Cluster</strong></td>
+        <td><code>docker compose up -d --build</code></td>
+      </tr>
+      <tr>
+        <td><strong>2. Inspect Running State</strong></td>
+        <td><code>docker compose ps</code></td>
+      </tr>
+      <tr>
+        <td><strong>3. Stream Combined Logs</strong></td>
+        <td><code>docker compose logs -f</code></td>
+      </tr>
+      <tr>
+        <td><strong>4. Stream Backend Logs</strong></td>
+        <td><code>docker compose logs -f backend</code></td>
+      </tr>
+      <tr>
+        <td><strong>5. Stop Cluster (Preserve Data)</strong></td>
+        <td><code>docker compose stop</code></td>
+      </tr>
+      <tr>
+        <td><strong>6. Re-Launch Stopped Containers</strong></td>
+        <td><code>docker compose start</code></td>
+      </tr>
+      <tr>
+        <td><strong>7. Full Teardown</strong></td>
+        <td><code>docker compose down</code></td>
+      </tr>
+      <tr>
+        <td><strong>8. Teardown + Reset Database</strong></td>
+        <td><code>docker compose down -v</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>7. Access Points & Verification URLs</h2>
+  <ul>
+    <li><strong>Production Web Application (Nginx Ingress):</strong> <code>http://localhost</code> (Port 80)</li>
+    <li><strong>Backend Direct REST Health / Catalog:</strong> <code>http://localhost:8080/api/movies</code></li>
+    <li><strong>Database Direct Port:</strong> <code>localhost:3306</code> (User: <code>root</code>, Pass: <code>rootpassword</code>)</li>
+  </ul>
+
+</body>
+</html>

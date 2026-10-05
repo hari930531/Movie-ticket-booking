@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS EC2 Deployment Guide - Hari's Theater</title>
+  <style>
+    /* CSS Reset & System Typography */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #000000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 13.5px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 14mm 14mm 16mm 14mm;
+    }
+
+    body {
+      padding: 24px 30px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Floating Print Action Control */
+    .print-btn-bar {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      gap: 10px;
+    }
+
+    .print-btn {
+      background: #0f172a;
+      color: #ffffff;
+      border: 2px solid #000000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .print-btn:hover {
+      background: #f59e0b;
+      color: #000000;
+      border-color: #000000;
+      transform: translateY(-1px);
+    }
+
+    /* Badges & Headers */
+    .doc-badge {
+      display: inline-block;
+      border: 2px solid #b45309;
+      background: #fef3c7;
+      color: #78350f;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 900;
+      color: #000000;
+      margin: 4px 0 6px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid #000000;
+      letter-spacing: -0.3px;
+    }
+
+    .meta-box {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 20px;
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+
+    h2 {
+      font-size: 16.5px;
+      font-weight: 800;
+      color: #000000;
+      margin-top: 26px;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #334155;
+      page-break-after: avoid;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 18px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+
+    p {
+      color: #0f172a;
+      margin: 8px 0;
+      font-weight: 500;
+    }
+
+    ul, ol {
+      margin: 8px 0 14px 20px;
+      padding: 0;
+      color: #0f172a;
+      font-weight: 500;
+    }
+
+    li {
+      margin-bottom: 5px;
+    }
+
+    /* High-Contrast Code Blocks */
+    pre {
+      background-color: #f8fafc !important;
+      border: 2px solid #0f172a !important;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin: 10px 0 16px;
+      font-family: "Consolas", "Courier New", "Liberation Mono", Courier, monospace;
+      font-size: 12px;
+      font-weight: 700 !important;
+      color: #000000 !important;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-all;
+      page-break-inside: avoid;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", "Liberation Mono", Courier, monospace;
+      background: #f1f5f9;
+      border: 1px solid #94a3b8;
+      color: #000000;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    pre code {
+      border: none;
+      background: transparent;
+      padding: 0;
+      font-size: 12px;
+      color: #000000;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px;
+      font-size: 12.5px;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1.5px solid #000000;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+      color: #000000;
+    }
+
+    th {
+      background-color: #e2e8f0 !important;
+      font-weight: 800;
+    }
+
+    td {
+      font-weight: 600;
+    }
+
+    .badge-solid {
+      display: inline-block;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid #000000;
+      font-size: 11px;
+    }
+
+    .badge-step { background: #0f172a; color: #ffffff; }
+
+    /* Page Breaks for Multi-Page Printing */
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+      margin-top: 10px;
+      display: block;
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .print-btn-bar {
+        display: none !important;
+      }
+
+      pre {
+        background-color: #f8fafc !important;
+        border: 2px solid #000000 !important;
+        color: #000000 !important;
+      }
+
+      th {
+        background-color: #e2e8f0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Print Control Button -->
+  <div class="print-btn-bar">
+    <button class="print-btn" onclick="window.print()">
+      🖨️ Save as Crisp PDF
+    </button>
+  </div>
+
+  <span class="doc-badge">Production Deployment Standard Operating Procedure (SOP)</span>
+  <h1>☁️ AWS EC2 Cloud Deployment Guide</h1>
+  <div class="meta-box">
+    📽️ <strong>Target Application:</strong> Hari's Theater Full-Stack Multiplex Ticketing System &nbsp;|&nbsp; <strong>Infrastructure:</strong> AWS EC2 (Amazon Linux 2023) + Docker Compose + Nginx
+  </div>
+
+  <p>This operational manual details the end-to-end production deployment of Hari's Theater onto Amazon Web Services (AWS) using an Elastic Compute Cloud (EC2) instance. The setup provisions an isolated Docker network managing MySQL 8.0, Spring Boot 3.x, and an Angular 17/18 single-page application served via an Nginx reverse proxy.</p>
+
+  <h2>1. AWS Cloud Architecture Overview</h2>
+  <pre>
+Patron Web Browser (Public Internet)
+       │
+       ▼ Inbound Ports 80 (HTTP) / 443 (HTTPS)
+┌────────────────────────────────────────────────────────────────────────┐
+│               AWS EC2 Instance (Security Group Filtered)               │
+│                                                                        │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │                    cinema-frontend Container                     │  │
+│  │                     (Nginx Reverse Proxy)                        │  │
+│  │  ├── Serves Angular Static Artifacts &amp; Posters (/movies/*.jpeg)   │  │
+│  │  └── Reverse Proxies API Calls (/api/...) ──────────────────┐    │  │
+│  └─────────────────────────────────────────────────────────────┼────┘  │
+│                                                                │       │
+│                                                                ▼ :8080 │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │                     cinema-backend Container                     │  │
+│  │                    (Spring Boot 3.x REST API)                    │  │
+│  │  ├── Movie Catalog Engine (3 Multiplex Screens)                  │  │
+│  │  └── Reservation &amp; Boarding Pass Generator Service               │  │
+│  └─────────────────────────────┬────────────────────────────────────┘  │
+│                                │                                       │
+│                                ▼ Port 3306 (Internal Bridge)           │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │                      cinema-mysql Container                      │  │
+│  │               (MySQL 8.0 with Persistent Volume)                 │  │
+│  │  └── Database Schema: ticket_booking                             │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────┘
+  </pre>
+
+  <h2>2. Step 1: Launch an AWS EC2 Instance</h2>
+  <ol>
+    <li>Sign in to the <strong>AWS Management Console</strong> and open the <strong>EC2 Dashboard</strong>.</li>
+    <li>Click <strong>Launch instance</strong> and specify the configuration:
+      <ul>
+        <li><strong>Name:</strong> <code>haris-theater-production</code></li>
+        <li><strong>Amazon Machine Image (AMI):</strong> <code>Amazon Linux 2023 AMI</code> (64-bit x86_64 Architecture).</li>
+        <li><strong>Instance Type:</strong> <code>t3.small</code> (Recommended: 2 vCPU, 2 GiB RAM for Java + Node/Angular build) or <code>t2.medium</code>.</li>
+        <li><strong>Key pair (login):</strong> Select an existing key pair or click <strong>Create new key pair</strong> (Format: <code>.pem</code>), saved as <code>haris-theater-key.pem</code>.</li>
+      </ul>
+    </li>
+    <li><strong>Network Settings &amp; Security Group Rules:</strong> Select <em>Create security group</em> and configure the mandatory inbound firewall rules:
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 25%;">Rule Type</th>
+            <th style="width: 20%;">Port Range</th>
+            <th style="width: 25%;">Source CIDR</th>
+            <th style="width: 30%;">Operational Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SSH</strong></td>
+            <td><code>22</code></td>
+            <td><code>My IP</code> (or <code>0.0.0.0/0</code>)</td>
+            <td>Secure Shell remote administration</td>
+          </tr>
+          <tr>
+            <td><strong>HTTP</strong></td>
+            <td><code>80</code></td>
+            <td><code>0.0.0.0/0</code></td>
+            <td>Public patron web ingress (Nginx)</td>
+          </tr>
+          <tr>
+            <td><strong>HTTPS</strong></td>
+            <td><code>443</code></td>
+            <td><code>0.0.0.0/0</code></td>
+            <td>TLS/SSL encrypted web traffic</td>
+          </tr>
+          <tr>
+            <td><strong>Custom TCP</strong></td>
+            <td><code>8080</code></td>
+            <td><code>0.0.0.0/0</code></td>
+            <td>Direct Spring Boot REST API validation</td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+    <li><strong>Configure Storage:</strong> Increase the Root EBS Volume size to at least <strong>20 GiB</strong> (gp3) to accommodate Docker image builds and database volume persistence.</li>
+    <li>Click <strong>Launch instance</strong>.</li>
+  </ol>
+
+  <div class="page-break"></div>
+
+  <h2>3. Step 2: Establish Secure SSH Connection</h2>
+  <p>Open a terminal (PowerShell or Bash) on your local computer where your <code>.pem</code> key is stored:</p>
+  <pre>
+# Linux/macOS: Enforce read-only key permissions
+chmod 400 haris-theater-key.pem
+
+# Connect using the Public IPv4 Address assigned to your EC2 instance
+ssh -i "haris-theater-key.pem" ec2-user@&lt;YOUR_EC2_PUBLIC_IP&gt;
+  </pre>
+
+  <h2>4. Step 3: Install Docker, Docker Compose, &amp; Git on Amazon Linux 2023</h2>
+  <p>Execute the following script block directly in the remote EC2 SSH shell to install and configure the container runtime:</p>
+  <pre>
+# 1. Update system package repository
+sudo dnf update -y
+
+# 2. Install Docker container runtime and Git version control
+sudo dnf install -y docker git
+
+# 3. Enable and start Docker system daemon
+sudo systemctl enable --now docker
+
+# 4. Add the ec2-user to the docker security group (eliminates sudo requirements)
+sudo usermod -aG docker ec2-user
+
+# 5. Install the official Docker Compose v2 plugin
+DOCKER_CONFIG=${DOCKER_CONFIG:-/usr/local/lib/docker/cli-plugins}
+sudo mkdir -p $DOCKER_CONFIG
+sudo curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" -o $DOCKER_CONFIG/docker-compose
+sudo chmod +x $DOCKER_CONFIG/docker-compose
+
+# 6. Refresh group associations immediately
+newgrp docker
+
+# 7. Validate installed tools
+docker --version
+docker compose version
+git --version
+  </pre>
+
+  <h2>5. Step 4: Clone the Project Repository onto EC2</h2>
+  <p>Clone your remote Git repository into the <code>ec2-user</code> home directory:</p>
+  <pre>
+cd ~
+git clone &lt;YOUR_GITHUB_REPOSITORY_URL&gt; Movie-ticket-booking
+cd Movie-ticket-booking
+  </pre>
+  <p><em>Alternative (Direct SCP Upload from Local Windows Machine):</em> If deploying without GitHub, upload the project directory directly from your local PowerShell terminal:</p>
+  <pre>
+scp -i "haris-theater-key.pem" -r "H:\PROJECT\Movie-ticket-booking" ec2-user@&lt;YOUR_EC2_PUBLIC_IP&gt;:~/Movie-ticket-booking
+  </pre>
+
+  <div class="page-break"></div>
+
+  <h2>6. Step 5: Production `docker-compose.yml` Configuration</h2>
+  <p>Verify that your <code>docker-compose.yml</code> in the project root is configured for container-to-container service discovery:</p>
+  <pre>
+cat &lt;&lt; 'EOF' &gt; docker-compose.yml
+version: '3.8'
+
+services:
+  # 1. MySQL 8.0 Database Engine
+  mysql-db:
+    image: mysql:8.0
+    container_name: cinema-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ticket_booking
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - cinema-net
+
+  # 2. Spring Boot 3.x Backend Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cinema-backend
+    restart: on-failure
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/ticket_booking?createDatabaseIfNotExist=true&amp;useSSL=false&amp;allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rootpassword
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql-db
+    networks:
+      - cinema-net
+
+  # 3. Angular 17/18 Frontend with Nginx Reverse Proxy
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cinema-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - cinema-net
+
+volumes:
+  db_data:
+
+networks:
+  cinema-net:
+    driver: bridge
+EOF
+  </pre>
+
+  <h2>7. Step 6: Launch and Verify the Container Stack</h2>
+  <p>Build and start all three containers in detached mode:</p>
+  <pre>
+# Build images and start services
+docker compose up -d --build
+
+# Verify container operational health status
+docker compose ps
+  </pre>
+  <p>Confirm that all three containers (<code>cinema-mysql</code>, <code>cinema-backend</code>, and <code>cinema-frontend</code>) show state <code>Up</code>.</p>
+
+  <div class="page-break"></div>
+
+  <h2>8. Step 7: Live Cloud Verification &amp; Testing Runbook</h2>
+  <ol>
+    <li><strong>Patron Web Ingress:</strong> Open your local browser and navigate to:
+      <pre>http://&lt;YOUR_EC2_PUBLIC_IP&gt;</pre>
+      Verify that the theater title, address, live digital clock, and all 9 movie posters across <strong>Screen 1</strong>, <strong>Screen 2</strong>, and <strong>Screen 3</strong> load cleanly without missing image assets.
+    </li>
+    <li><strong>Booking Flow:</strong> Select a movie (e.g. <em>Jailer 2</em>), choose a showtime session (Morning, Matinee, or Night), select an available seat (Green turns Gold), input passenger details, and confirm the reservation. Confirm that the Boarding Pass ticket renders with a valid barcode and print support.</li>
+    <li><strong>REST API Endpoint:</strong> Verify raw JSON database streaming:
+      <pre>http://&lt;YOUR_EC2_PUBLIC_IP&gt;:8080/api/movies</pre>
+    </li>
+  </ol>
+
+  <h2>9. Step 8: Configure Systemd Service for Auto-Recovery</h2>
+  <p>To ensure your theater cluster restarts automatically whenever the EC2 instance reboots or recovers from maintenance:</p>
+  <pre>
+# Create systemd service descriptor
+sudo bash -c 'cat &lt;&lt; EOF &gt; /etc/systemd/system/haris-theater.service
+[Unit]
+Description=Haris Theater Docker Compose Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/ec2-user/Movie-ticket-booking
+ExecStart=/usr/local/lib/docker/cli-plugins/docker-compose up -d
+ExecStop=/usr/local/lib/docker/cli-plugins/docker-compose down
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+
+# Reload systemd daemon and activate service
+sudo systemctl daemon-reload
+sudo systemctl enable haris-theater.service
+  </pre>
+
+  <h2>10. Production Operations &amp; Maintenance Command Reference</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 35%;">Maintenance Operation</th>
+        <th style="width: 65%;">Executable Shell Command</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Pull Updates &amp; Rebuild</strong></td>
+        <td><code>git pull &amp;&amp; docker compose up -d --build</code></td>
+      </tr>
+      <tr>
+        <td><strong>Stream All Service Logs</strong></td>
+        <td><code>docker compose logs -f</code></td>
+      </tr>
+      <tr>
+        <td><strong>Stream Backend Logs Only</strong></td>
+        <td><code>docker compose logs -f backend</code></td>
+      </tr>
+      <tr>
+        <td><strong>Direct Database Query</strong></td>
+        <td><code>docker exec -it cinema-mysql mysql -uroot -prootpassword ticket_booking -e "SELECT * FROM bookings ORDER BY id DESC LIMIT 5;"</code></td>
+      </tr>
+      <tr>
+        <td><strong>Stop Cluster Safely</strong></td>
+        <td><code>docker compose stop</code></td>
+      </tr>
+      <tr>
+        <td><strong>Tear Down Cluster</strong></td>
+        <td><code>docker compose down</code></td>
+      </tr>
+      <tr>
+        <td><strong>Prune Unused Build Caches</strong></td>
+        <td><code>docker system prune -af</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+version: '3.8'
+
+networks:
+  cinema-net:
+    driver: bridge
+
+services:
+  cinema-mysql:
+    image: mysql:8.0
+    container_name: cinema-mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ticket_booking
+    ports:
+      - "3306:3306"
+    networks:
+      - cinema-net
+    restart: always
+
+  cinema-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: cinema_backend_image:1.0
+    container_name: cinema-backend
+    ports:
+      - "8080:8080"
+    networks:
+      - cinema-net
+    depends_on:
+      - cinema-mysql
+    restart: always
+
+  cinema-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: cinema-frontend:1.0
+    container_name: cinema-frontend
+    ports:
+      - "80:80"
+    networks:
+      - cinema-net
+    depends_on:
+      - cinema-backend
+    restart: always

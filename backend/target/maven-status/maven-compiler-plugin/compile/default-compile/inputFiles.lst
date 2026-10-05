@@ -1,0 +1,8 @@
+H:\PROJECT\Movie-ticket-booking\backend\src\main\java\com\example\booking\repository\MovieRepository.java
+H:\PROJECT\Movie-ticket-booking\backend\src\main\java\com\example\booking\controller\MovieController.java
+H:\PROJECT\Movie-ticket-booking\backend\src\main\java\com\example\booking\entity\Movie.java
+H:\PROJECT\Movie-ticket-booking\backend\src\main\java\com\example\booking\BookingApplication.java
+H:\PROJECT\Movie-ticket-booking\backend\src\main\java\com\example\booking\controller\BookingController.java
+H:\PROJECT\Movie-ticket-booking\backend\src\main\java\com\example\booking\config\CorsConfig.java
+H:\PROJECT\Movie-ticket-booking\backend\src\main\java\com\example\booking\repository\BookingRepository.java
+H:\PROJECT\Movie-ticket-booking\backend\src\main\java\com\example\booking\entity\Booking.java
