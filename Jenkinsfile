@@ -113,7 +113,7 @@ pipeline {
                     script {
                         if (isUnix()) {
                             // Login to Docker Hub via standard input
-                            sh 'echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin'
+                            sh 'echo "$DH_PASS" | docker login -u hari930531 --password-stdin'
                             // Push backend images (versioned tag + latest)
                             sh "docker push ${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
                             sh "docker push ${BACKEND_IMAGE_NAME}:latest"
@@ -123,7 +123,8 @@ pipeline {
                             // Clean up local login session
                             sh 'docker logout'
                         } else {
-                            bat 'echo %DH_PASS% | docker login -u %DH_USER% --password-stdin'
+                            //bat 'echo %DH_PASS% | docker login -u hari930531 --password-stdin'
+                            bat 'docker login -u hari930531 -p %DH_PASS%'
                             bat "docker push ${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
                             bat "docker push ${BACKEND_IMAGE_NAME}:latest"
                             bat "docker push ${FRONTEND_IMAGE_NAME}:${IMAGE_TAG}"
