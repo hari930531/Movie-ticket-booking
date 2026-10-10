@@ -32,4 +32,4 @@ INSERT INTO movies (id, title, genre, duration, price) VALUES
 (6, 'Bramayugam', 'Mystery / Horror', 139, 200.0),
 (7, 'Kudumbasthan', 'Comedy / Drama', 140, 180.0),
 (8, 'Kalamkaval', 'Crime / Investigation', 145, 200.0),
-(9, 'Ekō', 'Adventure / Drama', 125, 180.0);
+(9, 'Eko', 'Adventure / Drama', 125, 180.0);
